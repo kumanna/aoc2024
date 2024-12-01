@@ -7,3 +7,4 @@ You can run the code from the top directory as follows:
 ```
 dune exec aoc_2024_day1
 ```
+where you can change `day1` appropriately.
