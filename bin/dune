@@ -1,0 +1,9 @@
+(library
+ (name utils)
+ (modules utils))
+
+(executable
+ (public_name aoc_2024_day1)
+ (name day1)
+ (modules day1)
+ (libraries utils))
