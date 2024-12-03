@@ -14,6 +14,32 @@ let get_product s =
         | _ -> 0)
       | _ -> 0)
 
+let chomp_string s =
+  let rec chomp_string_helper unchomped_string running_string add_now =
+    let l = String.length unchomped_string in
+    if l < 4 then
+      if add_now then
+        running_string ^ unchomped_string
+      else
+        running_string
+    else if (String.sub unchomped_string 0 4) = "do()" then
+      chomp_string_helper
+        (String.sub unchomped_string 4 (l - 4))
+        running_string
+        true
+    else if l > 7 && (String.sub unchomped_string 0 7) = "don't()" then
+      chomp_string_helper
+        (String.sub unchomped_string 7 (l - 7))
+        running_string
+        false
+    else
+      chomp_string_helper
+        (String.sub unchomped_string 1 (l - 1))
+        (running_string ^ (if add_now then (String.sub unchomped_string 0 1) else ""))
+        add_now
+  in
+  chomp_string_helper s "" true
+
 let get_mul_strings s =
   let mul_regexp = Str.regexp "mul[(][0-9][0-9]*,[0-9][0-9]*[)]" in
   let rec get_mul_string_helper n running_sum =
@@ -35,4 +61,11 @@ let () =
     |> List.map get_mul_strings
     |> List.fold_left (fun x y -> x + y) 0
     |> string_of_int
-    |> print_endline
+    |> print_endline;
+    input
+    |> read_lines
+    |> String.concat ""
+    |> chomp_string
+    |> get_mul_strings
+    |> string_of_int
+    |> print_endline;
