@@ -25,6 +25,19 @@ let evaluate_one_dropped l =
   done;
   !found_valid
 
+let evaluate_one_dropped_2 l =
+  let rec evaluate_one_dropped_2_helper left right =
+    match right with
+    | [] -> false
+    | a::rest ->
+      if (List.concat [left;rest] |> successive_diff |> check_for_same_signs 1)
+      then true
+      else
+        evaluate_one_dropped_2_helper (List.concat [left;[a]])
+          rest
+  in
+  evaluate_one_dropped_2_helper [] l
+
 let () =
   let input = "inputs/day2.txt" in
   let lines =
@@ -48,6 +61,13 @@ let () =
   lines
   |> List.map (fun x -> List.map int_of_string x)
   |> List.map evaluate_one_dropped
+  |> List.filter (fun x -> x)
+  |> List.length
+  |> string_of_int
+  |> print_endline;
+  lines
+  |> List.map (fun x -> List.map int_of_string x)
+  |> List.map evaluate_one_dropped_2
   |> List.filter (fun x -> x)
   |> List.length
   |> string_of_int
