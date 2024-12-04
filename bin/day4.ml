@@ -57,6 +57,27 @@ let find_xmas grid =
   done;
   !xmascount
 
+let find_xmas_cross grid =
+  let rowmax = Array.length grid in
+  let colmax = Array.length grid.(0) in
+  let find_xmas_cross_helper row col =
+    if row > 0 && row < rowmax - 1 && col > 0 && col < colmax - 1 then
+      if (grid.(row - 1).(col - 1) = 'M' && grid.(row + 1).(col + 1) = 'S' ||
+         grid.(row + 1).(col + 1) = 'M' && grid.(row - 1).(col - 1) = 'S') &&
+         (grid.(row - 1).(col + 1) = 'M' && grid.(row + 1).(col - 1) = 'S' ||
+          grid.(row + 1).(col - 1) = 'M' && grid.(row - 1).(col + 1) = 'S')
+      then
+        1 else 0
+    else 0
+  in
+  let xmascount = ref 0 in
+  for row = 0 to rowmax - 1 do
+    for col = 0 to colmax - 1 do
+      if grid.(row).(col) = 'A' then
+        xmascount := !xmascount + (find_xmas_cross_helper row col)
+    done
+  done;
+  !xmascount
 
 let () =
     let input_file = "inputs/day4.txt" in
@@ -68,5 +89,13 @@ let () =
     |> Array.of_list
     |> find_xmas
     |> string_of_int
-    |> print_endline
-
+    |> print_endline;
+    input_file
+    |> read_lines
+    |> List.filter (fun x -> String.length x > 1)
+    |> List.map explode
+    |> List.map Array.of_list
+    |> Array.of_list
+    |> find_xmas_cross
+    |> string_of_int
+    |> print_endline;
