@@ -39,6 +39,12 @@ let rec identify_positions grid current_pos n_covered =
     let n_columns = Array.length grid.(0) in
     if row < 0 || row > n_rows - 1 || col < 0 || col > n_columns - 1 then
       (n_covered, false)
+    else if grid.(row).(col) = '#' then
+      match direction with
+      | Up -> identify_positions grid (GridPositions.create (row + 1, col, Right)) n_covered
+      | Down -> identify_positions grid (GridPositions.create (row - 1, col, Left)) n_covered
+      | Left -> identify_positions grid (GridPositions.create (row, col + 1, Up)) n_covered
+      | Right -> identify_positions grid (GridPositions.create (row, col - 1, Down)) n_covered
     else
       let new_p_set = current_pos::n_covered in
       match direction with
