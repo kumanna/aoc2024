@@ -34,7 +34,7 @@ let rec identify_positions grid current_pos n_covered direction =
   if row < 0 || row > n_rows - 1 || col < 0 || col > n_columns - 1 then
     n_covered
   else
-    let new_p_set = PositionSet.add current_pos n_covered in
+    let new_p_set = current_pos::n_covered in
     match direction with
     | Up -> if row = 0 then new_p_set
       else if grid.(row - 1).(col) = '#' then
@@ -77,7 +77,8 @@ let () =
     |> List.hd
   in
   let current_position = GridPositions.create (start_row, start_column) in
-  identify_positions grid current_position PositionSet.empty Up
+  identify_positions grid current_position [] Up
+  |> PositionSet.of_list
   |> PositionSet.cardinal
   |> string_of_int
   |> print_endline
