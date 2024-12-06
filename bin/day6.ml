@@ -36,7 +36,7 @@ let rec identify_positions grid current_pos n_covered direction =
   else
     let new_p_set = PositionSet.add current_pos n_covered in
     match direction with
-    | Up -> if row = 0 then n_covered
+    | Up -> if row = 0 then new_p_set
       else if grid.(row - 1).(col) = '#' then
         identify_positions grid (GridPositions.create (row, col + 1)) new_p_set Right
       else
