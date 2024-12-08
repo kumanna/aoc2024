@@ -14,11 +14,11 @@ let find_antinode (a1row, a1col) (a2row, a2col) grid =
   else
     Some (new_row, new_col)
 
-let rec find_antinodes_partb (a1row, a1col) (a2row, a2col) running_list grid =
-  let running_list = if running_list = [] then [(a1row, a1col);(a2row, a2col)] else running_list in
-  let new_node = find_antinode (a1row, a1col) (a2row, a2col) grid in
+let rec find_antinodes_partb a1 a2 running_list grid =
+  let running_list = if running_list = [] then [a1;a2] else running_list in
+  let new_node = find_antinode a1 a2 grid in
   match new_node with
-  | Some x -> find_antinodes_partb x (a1row, a1col) (x::running_list) grid
+  | Some x -> find_antinodes_partb x a1 (x::running_list) grid
   | None -> running_list
 
 let () =
@@ -52,7 +52,8 @@ let () =
   |> print_endline;
   Char_Set.to_list !cs
   |> List.map (Hashtbl.find_all antenna_table)
-  |> List.map (fun x -> List.map (fun y -> List.map (fun z -> find_antinodes_partb z y [] grid) x) x) |> List.concat
+  |> List.map (fun x -> List.map (fun y -> List.map (fun z -> find_antinodes_partb z y [] grid) x) x)
+  |> List.concat
   |> List.concat
   |> List.concat
   |> List.sort_uniq compare
