@@ -60,10 +60,53 @@ let fill_blank_element a =
     done;
     Dynarray.to_array da
 
+let consolidate_blanks a =
+  Array.fold_left (fun x y ->
+      let ax = (Array.length x) in
+      match (x.(ax - 1), y) with
+      | (Blank a, Blank b) -> Array.concat [Array.sub x 0 (ax - 1);[|Blank (a + b)|]]
+      | _ -> Array.concat [x;[|y|]]) (Array.of_list [a.(0)]) (Array.sub a 1 ((Array.length a) - 1))
+
+let find_id_location id a =
+  Array.find_index (fun x ->
+      match x with
+      | File (file_id, _) -> file_id = id
+      | _ -> false) a |> Option.get
+
+let move_file a location =
+  let al = Array.length a in
+  let new_array = ref a in
+  match a.(location) with
+  | Blank _ -> Array.sub a 0 (al - 1)
+  | File (file_id, filesize) ->
+    let file_moved = ref false in
+    for i = 0 to location - 1 do
+      if not !file_moved then
+        match a.(i) with
+        | Blank blanksize ->
+          (if blanksize > filesize then
+             (new_array := Array.concat [Array.sub a 0 i;
+                                         [|File (file_id, filesize);Blank (blanksize - filesize)|];
+                                         Array.sub a (i + 1) (al - i - 1)];
+              new_array.contents.(location + 1) <- Blank filesize;
+              file_moved := true)
+           else if blanksize = filesize then
+             (new_array := Array.concat [Array.sub a 0 i;
+                                         [|File (file_id, filesize)|];
+                                         Array.sub a (i + 1) (al - i - 1)];
+              new_array.contents.(location) <- Blank filesize;
+              file_moved := true)
+          )
+        | _ -> ()
+    done;
+    match (!new_array).(Array.length (!new_array) - 1) with
+    | Blank _ -> Array.sub !new_array 0 (Array.length (!new_array) - 1) |> consolidate_blanks
+    | _ -> !new_array |> consolidate_blanks
+
 let () =
   let input_file = "inputs/day9.txt" in
-  let memory_array = ref
-    (input_file
+  let memory_array =
+    input_file
     |> read_lines
     |> List.hd
     |> explode
@@ -73,20 +116,44 @@ let () =
            match x with
            | Blank x -> if x = 0 then None else Some (Blank x)
            | File (a, b) -> Some (File (a, b)))
-    |> Array.of_list)
+    |> Array.of_list
   in
-  while not (check_array_sorted !memory_array) do
-    memory_array := fill_blank_element !memory_array
+  let memory_array_ref = ref (Array.copy memory_array) in
+  while not (check_array_sorted !memory_array_ref) do
+    memory_array_ref := fill_blank_element !memory_array_ref
   done;
   let total = ref 0 in
   let index = ref 0 in
-  for i = 0 to (Array.length !memory_array) - 1 do
-    match (!memory_array).(i) with
+  for i = 0 to (Array.length !memory_array_ref) - 1 do
+    match (!memory_array_ref).(i) with
     | File (id, size) ->
        for j = (!index) to (!index + size - 1) do
          total := !total + j * id
        done;
        index := !index + size
     | Blank _ -> ()
+  done;
+  !total |> string_of_int |> print_endline;
+  let max_file_id =
+    let al = Array.length memory_array in
+    match memory_array.(al - 1) with
+    | File (id, _) -> id
+    | _ -> -1
+  in
+  let moved_memory_array_ref = ref memory_array in
+  for i = 0 to max_file_id do
+    let current_id = max_file_id - i in
+    moved_memory_array_ref := move_file !moved_memory_array_ref (find_id_location current_id !moved_memory_array_ref)
+  done;
+  let total = ref 0 in
+  let index = ref 0 in
+  for i = 0 to (Array.length !moved_memory_array_ref) - 1 do
+    match (!moved_memory_array_ref).(i) with
+    | File (id, size) ->
+       for j = (!index) to (!index + size - 1) do
+         total := !total + j * id
+       done;
+       index := !index + size
+    | Blank n -> index := !index + n
   done;
   !total |> string_of_int |> print_endline;
