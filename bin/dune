@@ -55,3 +55,9 @@
  (name day9)
  (modules day9)
  (libraries utils))
+
+(executable
+ (public_name aoc_2024_day10)
+ (name day10)
+ (modules day10)
+ (libraries utils))
