@@ -16,9 +16,7 @@ let split_number n =
 let count_table = Hashtbl.create 16
 
 let rec process_stone n blinks =
-  if blinks = 0 then
-    (Hashtbl.add count_table (n, blinks) 1;
-     1)
+  if blinks = 0 then 1
   else
     (match Hashtbl.find_opt count_table (n, blinks) with
     | Some result -> result
