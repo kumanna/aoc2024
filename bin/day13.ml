@@ -24,26 +24,20 @@ module Game = struct
     let (prize_x, prize_y) = parse_offsets 6 s3 in
     { a_offset ; b_offset ; prize_x ; prize_y }
 
-  let find_feasibility { a_offset ; b_offset ; prize_x ; prize_y } =
+  (* Ignored the case where *)
+  (* the rows are scaled versions of each other *)
+  let find_feasibility { a_offset ; b_offset ; prize_x ; prize_y } partb =
+    let prize_x = if partb then 10000000000000 + prize_x else prize_x in
+    let prize_y = if partb then 10000000000000 + prize_y else prize_y in
     let (a_offset_x, a_offset_y) = a_offset in
     let (b_offset_x, b_offset_y) = b_offset in
-    let max_b_presses = min (prize_x / b_offset_x) (prize_y / b_offset_y) in
-    let b_press_counts = List.init (max_b_presses + 1) (fun x -> x)
-    in
-    b_press_counts
-    |> List.filter_map
-         (fun n_b_presses ->
-           let current_total_x = n_b_presses * b_offset_x in
-           let current_total_y = n_b_presses * b_offset_y in
-           let n_a_presses_1 = (prize_x - current_total_x) / a_offset_x in
-           let n_a_presses_2 = (prize_y - current_total_y) / a_offset_y in
-           if n_a_presses_1 = n_a_presses_2 &&
-                n_a_presses_1 * a_offset_x + current_total_x = prize_x &&
-                  n_a_presses_1 * a_offset_y + current_total_y = prize_y
-           then
-             Some (n_a_presses_1, n_b_presses)
-           else
-             None)
+    let determinant = a_offset_x * b_offset_y - b_offset_x * a_offset_y in
+    let inverse_top_1 = b_offset_y * prize_x - b_offset_x * prize_y in
+    let inverse_top_2 = -a_offset_y * prize_x + a_offset_x * prize_y in
+    if determinant <> 0 && ((inverse_top_1 mod determinant) = 0) && ((inverse_top_2 mod determinant) = 0) then
+      Some (3 * (inverse_top_1 / determinant) + (inverse_top_2 / determinant))
+    else None
+
 end
 
 let parse_games l =
@@ -61,9 +55,15 @@ let () =
   |> read_lines
   |> List.filter (fun x -> String.length x > 0)
   |> parse_games
-  |> List.map Game.find_feasibility
-  |> List.filter (fun l -> List.length l > 0)
-  |> List.map (fun l -> List.fold_left (fun x (a, b) -> min x (3 * a + b)) 1000000000 l)
+  |> List.filter_map (fun x -> Game.find_feasibility x false)
   |> List.fold_left (fun x y -> x + y) 0
   |> string_of_int
-  |> print_endline
+  |> print_endline;
+  input_file
+  |> read_lines
+  |> List.filter (fun x -> String.length x > 0)
+  |> parse_games
+  |> List.filter_map (fun x -> Game.find_feasibility x true)
+  |> List.fold_left (fun x y -> x + y) 0
+  |> string_of_int
+  |> print_endline;
