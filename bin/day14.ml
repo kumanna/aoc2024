@@ -96,4 +96,10 @@ let () =
       |> List.length in
     if (List.length robots) = unique_positions then
       print_endline (string_of_int i);
-  done
+  done;
+  List.init (n_rows * n_cols - 1) (fun x -> x)
+  |> List.mapi (fun i x -> (i, List.map (Robot.execute_move x) robots))
+  |> List.filter (fun (_, x) -> (List.length x) = List.length (List.sort_uniq compare (List.map Robot.get_position x)))
+  |> List.map (fun (i, _) -> i)
+  |> List.map string_of_int
+  |> List.iter print_endline
