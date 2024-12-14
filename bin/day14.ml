@@ -98,8 +98,9 @@ let () =
       print_endline (string_of_int i);
   done;
   List.init (n_rows * n_cols - 1) (fun x -> x)
-  |> List.mapi (fun i x -> (i, List.map (Robot.execute_move x) robots))
-  |> List.filter (fun (_, x) -> (List.length x) = List.length (List.sort_uniq compare (List.map Robot.get_position x)))
-  |> List.map (fun (i, _) -> i)
+  |> List.mapi (fun i x ->
+      if (List.map (Robot.execute_move x) robots) |> List.map Robot.get_position |> List.sort_uniq compare |> List.length = (List.length robots) then
+      Some i else None)
+  |> List.filter_map (fun x -> x)
   |> List.map string_of_int
   |> List.iter print_endline
