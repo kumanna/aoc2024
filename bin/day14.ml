@@ -43,8 +43,15 @@ module Robot = struct
       } =
     let new_position_row = (position_row + velocity_row * n) mod n_rows in
     let new_position_col = (position_col + velocity_col * n) mod n_cols in
-    ((if new_position_row < 0 then new_position_row + n_rows else new_position_row),
-     (if new_position_col < 0 then new_position_col + n_cols else new_position_col))
+    {
+      position_row = if new_position_row < 0 then new_position_row + n_rows else new_position_row ;
+      position_col = if new_position_col < 0 then new_position_col + n_cols else new_position_col ;
+      velocity_row = velocity_row ;
+      velocity_col = velocity_col ;
+    }
+
+  let get_position r =
+    (r.position_row, r.position_col)
 
 end
 
@@ -56,6 +63,7 @@ let () =
   |> List.filter (fun x -> String.length x > 0)
   |> List.map Robot.create
   |> List.map (Robot.execute_move 100)
+  |> List.map (Robot.get_position)
   in
   let row_boundary = n_rows / 2 in
   let col_boundary = n_cols / 2 in
@@ -71,5 +79,21 @@ let () =
   let q4 =
     List.filter (fun (row, col) -> row < row_boundary && col > col_boundary) final_positions
     |> List.length in
-  q1 * q2 * q3 * q4 |> string_of_int |> print_endline
-
+  q1 * q2 * q3 * q4 |> string_of_int |> print_endline;
+  let robots =
+    input_file
+    |> read_lines
+    |> List.filter (fun x -> String.length x > 0)
+    |> List.map Robot.create
+  in
+  let current_robots = ref robots in
+  for i = 1 to (n_rows * n_cols - 1) do
+    current_robots := List.map (Robot.execute_move 1) (!current_robots);
+    let unique_positions =
+      !current_robots
+      |> List.map Robot.get_position
+      |> List.sort_uniq compare
+      |> List.length in
+    if (List.length robots) = unique_positions then
+      print_endline (string_of_int i);
+  done
