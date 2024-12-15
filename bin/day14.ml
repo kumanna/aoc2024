@@ -53,6 +53,24 @@ module Robot = struct
   let get_position r =
     (r.position_row, r.position_col)
 
+  let find_unique_position_times positions =
+    let n_robots = (List.length positions) in
+    let rec find_unique_position_times_helper n times positions =
+      if n = n_rows * n_cols then
+        times
+      else
+        let is_unique =
+          (positions
+          |> List.map get_position
+          |> List.sort_uniq compare
+          |> List.length) = n_robots in
+        find_unique_position_times_helper
+            (n + 1)
+            (if is_unique then (n::times) else times)
+            (positions |> List.map (execute_move 1))
+    in
+    find_unique_position_times_helper 0 [] positions
+
 end
 
 let () =
@@ -97,10 +115,7 @@ let () =
     if (List.length robots) = unique_positions then
       print_endline (string_of_int i);
   done;
-  List.init (n_rows * n_cols - 1) (fun x -> x)
-  |> List.mapi (fun i x ->
-      if (List.map (Robot.execute_move x) robots) |> List.map Robot.get_position |> List.sort_uniq compare |> List.length = (List.length robots) then
-      Some i else None)
-  |> List.filter_map (fun x -> x)
+  robots
+  |> Robot.find_unique_position_times
   |> List.map string_of_int
   |> List.iter print_endline
