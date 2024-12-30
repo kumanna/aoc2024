@@ -105,6 +105,12 @@
  (libraries utils))
 
 (executable
+ (public_name aoc_2024_day23)
+ (name day23)
+ (modules day23)
+ (libraries utils))
+
+(executable
  (public_name aoc_2024_day25)
  (name day25)
  (modules day25)
