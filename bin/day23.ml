@@ -11,6 +11,8 @@ module Triplet = struct
 
 end
 
+module StringSet = Set.Make(String)
+
 let () =
   let input_file = "inputs/day23.txt" in
   let pairs =
@@ -38,4 +40,24 @@ let () =
   |> List.filter (fun (x, y, z) -> String.get x 0 = 't' || String.get y 0 = 't' || String.get z 0 = 't')
   |> List.length
   |> string_of_int
+  |> print_endline;
+  let nodes =
+    pairs
+    |> List.map (fun (x, y) -> [x;y])
+    |> List.concat
+    |> List.sort_uniq compare in
+  let updated_list = ref (pairs |> List.map (fun (x, y) -> [x;y])) in
+  let constant = ref false in
+  while (not !constant) do
+    let current_list = !updated_list in
+    let new_list = !updated_list |> List.map (fun l -> l, List.filter (fun n -> List.fold_left (fun a x -> List.mem n (Hashtbl.find pair_dict x) && a) true l) nodes) |> List.map (fun (x, y) -> match y with
+        | [] -> x
+        | a::_ -> a::x) |> List.map StringSet.of_list |> List.sort_uniq compare |> List.map StringSet.to_list in
+    (constant := current_list = new_list;
+     updated_list := new_list);
+  done;
+  !updated_list
+  |> List.fold_left (fun x y -> if (List.length y) > (List.length x) then y else x) []
+  |> List.sort_uniq compare
+  |> String.concat ","
   |> print_endline
