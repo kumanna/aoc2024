@@ -1,11 +1,11 @@
 (lang dune 3.15)
 
-(name aoc_2023)
+(name aoc_2024)
 
 (generate_opam_files true)
 
 (source
- (github kumanna/aoc2023))
+ (github kumanna/aoc2024))
 
 (authors "Kumar Appaiah")
 
@@ -16,8 +16,8 @@
 ;(documentation https://url/to/documentation)
 
 (package
- (name aoc_2023)
- (synopsis "Advent of Code 2023")
+ (name aoc_2024)
+ (synopsis "Advent of Code 2024")
  (description "Some solutions in OCaml")
  (depends ocaml dune)
  (tags
